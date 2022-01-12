@@ -59,6 +59,15 @@ body {
   height: 5rem;
   text-align: center;
   width: 5rem;
+  transition: all 200ms ease-out;
+}
+
+.square:hover {
+  background: lightpink;
+}
+
+.square:active {
+  background: red;
 }
 
 .square:focus {

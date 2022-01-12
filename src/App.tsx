@@ -1,41 +1,50 @@
 import React from 'react';
 import './App.scss';
 
-interface GameProps {
-  value: number | string;
+type CallbackFunction = () => void;
+
+interface SquareProps {
+  value: null | 'X' | 'O';
+  onClick: CallbackFunction;
 }
 
-interface GameStates {
-  value: string | null;
-}
-
-class Square extends React.Component<GameProps, GameStates> {
-  constructor(props: any) {
-    super(props);
-    this.state = {
-      value: null
-    };
-    this.setValue = this.setValue.bind(this);
-  }
-
-  setValue() {
-    this.setState({
-      value: 'X'
-    });
-  }
-
+class Square extends React.Component<SquareProps> {
   render() {
     return (
-      <button className='square' onClick={this.setValue}>
-        {this.state.value}
+      <button className='square' onClick={() => this.props.onClick()}>
+        {this.props.value}
       </button>
     );
   }
 }
 
-class Board extends React.Component {
+interface BoardStates {
+  squares: (null | 'X' | 'O')[];
+}
+
+class Board extends React.Component<{}, BoardStates> {
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      squares: Array(9).fill(null)
+    };
+  }
+
+  handleClick(i: number) {
+    const squares = [...this.state.squares];
+    squares[i] = 'X';
+    this.setState({
+      squares
+    });
+  }
+
   renderSquare(i: number) {
-    return <Square value={i} />;
+    return (
+      <Square
+        value={this.state.squares[i]}
+        onClick={() => this.handleClick(i)}
+      />
+    );
   }
 
   render() {
