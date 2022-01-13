@@ -22,11 +22,12 @@ body {
 }
 
 .game {
-  width: 25rem;
+  width: 50rem;
   height: 30rem;
   display: flex;
-  justify-content: flex-start;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
   text-align: center;
   background: lightgray;
   padding: 1rem 3rem;

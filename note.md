@@ -29,3 +29,17 @@ The DOM \<button> element’s onClick attribute has a special meaning to React b
 ## Best Naming Method and Prop Practice in React
 
 In React, it’s conventional to use on[Event] names for props which represent events and handle[Event] for the methods which handle the events.
+
+## Data Change without Mutation
+
+```tsx
+var player = { score: 1, name: 'Jeff' };
+
+var newPlayer = Object.assign({}, player, { score: 2 });
+// Now player is unchanged, but newPlayer is {score: 2, name: 'Jeff'}
+
+// Or if you are using object spread syntax proposal, you can write:
+// var newPlayer = {...player, score: 2 | ...anotherObject};
+```
+
+The end result is the same but by not mutating (or changing the underlying data) directly, we gain several benefits described below.
