@@ -71,7 +71,7 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
       const history = this.state.history;
       const current = history[this.state.stepNumber];
       this.checkGame(current.squares);
-    } else if (this.state.stepNumber != this.state.history.length - 1) {
+    } else if (this.state.stepNumber !== this.state.history.length - 1) {
       this.setState({
         winner: null
       });
