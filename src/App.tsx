@@ -1,79 +1,73 @@
-import React, { Fragment } from 'react';
+import React from 'react';
+import * as AppTypes from './types';
 import './App.scss';
 
-type CallbackFunction = () => void;
-
-interface SquareProps {
-  value: null | 'X' | 'O';
-  onClick: CallbackFunction;
-}
-
-function Square(props: SquareProps) {
+function Square(props: AppTypes.SquareProps) {
   return (
-    <button className='square' onClick={props.onClick}>
+    <button
+      className='square'
+      onClick={props.onClick}
+      style={props.onHover ? { background: 'red' } : undefined}
+    >
       {props.value}
     </button>
   );
 }
 
-type CallbackFunctionVariadic = (i: number) => void;
-
-interface BoardProps {
-  squares: (null | 'X' | 'O')[];
-  onClick: CallbackFunctionVariadic;
-}
-
-class Board extends React.Component<BoardProps> {
+class Board extends React.Component<AppTypes.BoardProps> {
   renderSquare(i: number) {
     return (
       <Square
+        key={i}
         value={this.props.squares[i]}
         onClick={() => this.props.onClick(i)}
+        onHover={this.props.onHover[i]}
       />
     );
   }
 
   render() {
     return (
-      <Fragment>
-        <div className='board-row'>
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className='board-row'>
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className='board-row'>
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
-      </Fragment>
+      <>
+        {[...Array(3)].map((_, i) => (
+          <div className='board-row' key={i}>
+            {[...Array(3)].map((_, j) => this.renderSquare(i * 3 + j))}
+          </div>
+        ))}
+      </>
     );
   }
 }
 
-interface GameStates {
-  history: { squares: (null | 'X' | 'O')[] }[];
-  stepNumber: number;
-  xIsNext: boolean;
-}
-
-class Game extends React.Component<{}, GameStates> {
+class Game extends React.Component<{}, AppTypes.GameStates> {
   constructor(props: any) {
     super(props);
     this.state = {
       history: [
         {
-          squares: Array(9).fill(null)
+          squares: Array(9).fill(null),
+          hoverArr: Array(9).fill(false),
+          prevMove: [-1, -1]
         }
       ],
+      winner: null,
       stepNumber: 0,
       xIsNext: true
     };
+    this.resetGame = this.resetGame.bind(this);
+    this.handleHover = this.handleHover.bind(this);
+  }
+
+  componentDidUpdate() {
+    if (!this.state.winner) {
+      const history = this.state.history;
+      const current = history[this.state.stepNumber];
+      this.checkGame(current.squares);
+    } else if (this.state.stepNumber != this.state.history.length - 1) {
+      this.setState({
+        winner: null
+      });
+    }
   }
 
   handleClick(i: number) {
@@ -81,17 +75,68 @@ class Game extends React.Component<{}, GameStates> {
     const current = history[history.length - 1];
     const squares = [...current.squares];
 
-    if (calculateWinner(squares) || squares[i]) {
+    const prevMove = [Math.floor(i / 3), i % 3];
+
+    if (this.state.winner || squares[i]) {
       return;
     }
 
     squares[i] = this.state.xIsNext ? 'X' : 'O';
 
     this.setState((state) => ({
-      history: [...history, { squares }],
+      history: [...history, Object.assign({}, current, { squares, prevMove })],
       stepNumber: history.length,
       xIsNext: !state.xIsNext
     }));
+  }
+
+  handleHover([row, col]: number[]) {
+    const current = this.state.history[this.state.stepNumber];
+    const hoverArr = current.hoverArr;
+    const index = row * 3 + col;
+    hoverArr[index] = !hoverArr[index];
+
+    this.setState((state) => ({
+      history: [...state.history, Object.assign({}, current, { hoverArr })]
+    }));
+  }
+
+  handleWin(winnerBoxes: number[]) {
+    const current = this.state.history[this.state.stepNumber];
+    const hoverArr = [...current.hoverArr];
+
+    winnerBoxes.forEach((i) => (hoverArr[i] = true));
+
+    this.setState((state) => ({
+      history: [...state.history, Object.assign({}, current, { hoverArr })]
+    }));
+  }
+
+  checkGame(squares: AppTypes.BoardProps['squares']): void {
+    const possibleMoves = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+
+    for (const [firstIndex, ...rest] of possibleMoves) {
+      if (
+        rest.every(
+          (restIndex) =>
+            squares[firstIndex] && squares[firstIndex] === squares[restIndex]
+        )
+      ) {
+        this.handleWin([firstIndex, ...rest]);
+        this.setState({
+          winner: squares[firstIndex]
+        });
+      }
+    }
   }
 
   jumpTo(step: number) {
@@ -101,19 +146,20 @@ class Game extends React.Component<{}, GameStates> {
     });
   }
 
+  resetGame() {
+    this.setState((state) => ({
+      history: state.history.slice(0, 1),
+      winner: null,
+      hoverArr: Array(9).fill(false),
+      stepNumber: 0,
+      xIsNext: true
+    }));
+  }
+
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
-
-    const moves = history.map((_, move) => {
-      const desc = move ? `Go to move ${move}` : 'Go to gamestart';
-      return (
-        <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
-        </li>
-      );
-    });
+    const winner = this.state.winner;
 
     let status;
 
@@ -132,48 +178,36 @@ class Game extends React.Component<{}, GameStates> {
               <Board
                 squares={current.squares}
                 onClick={(i) => this.handleClick(i)}
+                onHover={current.hoverArr}
               />
             </div>
             <div className='game-info'>
               <div className='status'>{status}</div>
-              <ol>{moves}</ol>
+              <ol>
+                {history.map(({ prevMove }, move) => (
+                  <li key={move}>
+                    <button
+                      className='btn btn-blue'
+                      onClick={() => this.jumpTo(move)}
+                      onMouseOver={() => this.handleHover(prevMove)}
+                      onMouseOut={() => this.handleHover(prevMove)}
+                    >
+                      {move ? `Go to move ${prevMove}` : 'Go to gamestart'}
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <div className='button-wrapper'>
+              <button className='btn btn-red' onClick={this.resetGame}>
+                Reset
+              </button>
             </div>
           </div>
         </main>
       </div>
     );
   }
-}
-
-function calculateWinner(
-  squares: BoardProps['squares']
-): SquareProps['value'] | null {
-  const lines = [
-    // row
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    // column
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    // diagonal
-    [0, 4, 8],
-    [2, 4, 6]
-  ];
-
-  for (const [firstIndex, ...rest] of lines) {
-    if (
-      rest.every(
-        (restIndex) =>
-          squares[firstIndex] && squares[firstIndex] === squares[restIndex]
-      )
-    ) {
-      return squares[firstIndex];
-    }
-  }
-
-  return null;
 }
 
 export default Game;
