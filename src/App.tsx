@@ -7,7 +7,13 @@ function Square(props: AppTypes.SquareProps) {
     <button
       className='square'
       onClick={props.onClick}
-      style={props.onHover ? { background: 'red' } : undefined}
+      style={
+        props.onWinner
+          ? { background: 'Gold' }
+          : props.onHover
+          ? { background: 'red' }
+          : undefined
+      }
     >
       {props.value}
     </button>
@@ -21,6 +27,7 @@ class Board extends React.Component<AppTypes.BoardProps> {
         key={i}
         value={this.props.squares[i]}
         onClick={() => this.props.onClick(i)}
+        onWinner={this.props.onWinner[i]}
         onHover={this.props.onHover[i]}
       />
     );
@@ -50,6 +57,7 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
           prevMove: [-1, -1]
         }
       ],
+      selected: Array(9).fill(false),
       winner: null,
       stepNumber: 0,
       xIsNext: true
@@ -91,15 +99,13 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
   }
 
   handleHover([row, col]: number[]) {
-    const history = [...this.state.history];
-    const hoverArr = [...history[this.state.stepNumber].hoverArr];
+    const selected = [...this.state.selected];
 
-    hoverArr[row * 3 + col] = !hoverArr;
-
-    history[this.state.stepNumber].hoverArr = hoverArr;
+    const index = row * 3 + col;
+    selected[index] = !selected[index];
 
     this.setState({
-      history
+      selected
     });
   }
 
@@ -154,8 +160,9 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
   resetGame() {
     this.setState((state) => ({
       history: state.history.slice(0, 1),
-      winner: null,
+      selected: Array(9).fill(false),
       hoverArr: Array(9).fill(false),
+      winner: null,
       stepNumber: 0,
       xIsNext: true
     }));
@@ -185,7 +192,8 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
               <Board
                 squares={current.squares}
                 onClick={(i) => this.handleClick(i)}
-                onHover={current.hoverArr}
+                onWinner={current.hoverArr}
+                onHover={this.state.selected}
               />
             </div>
             <div className='game-info'>
@@ -196,16 +204,8 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
                     <button
                       className='btn btn-blue'
                       onClick={() => this.jumpTo(move)}
-                      onMouseOver={
-                        !this.state.winner
-                          ? () => this.handleHover(prevMove)
-                          : undefined
-                      }
-                      onMouseOut={
-                        !this.state.winner
-                          ? () => this.handleHover(prevMove)
-                          : undefined
-                      }
+                      onMouseOver={() => this.handleHover(prevMove)}
+                      onMouseOut={() => this.handleHover(prevMove)}
                     >
                       {move ? `Go to move ${prevMove}` : 'Go to gamestart'}
                     </button>

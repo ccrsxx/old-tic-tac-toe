@@ -7,6 +7,7 @@ interface GameStates {
     hoverArr: boolean[];
     prevMove: number[];
   }[];
+  selected: boolean[];
   winner: null | 'X' | 'O';
   stepNumber: number;
   xIsNext: boolean;
@@ -15,12 +16,14 @@ interface GameStates {
 interface BoardProps {
   squares: (null | 'X' | 'O')[];
   onClick: CallbackFunctionVariadic;
+  onWinner: boolean[];
   onHover: boolean[];
 }
 
 interface SquareProps {
   value: null | 'X' | 'O';
   onClick: CallbackFunction;
+  onWinner: boolean;
   onHover: boolean;
 }
 
