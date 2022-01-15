@@ -91,14 +91,16 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
   }
 
   handleHover([row, col]: number[]) {
-    const current = this.state.history[this.state.stepNumber];
-    const hoverArr = current.hoverArr;
-    const index = row * 3 + col;
-    hoverArr[index] = !hoverArr[index];
+    const history = [...this.state.history];
+    const hoverArr = [...history[this.state.stepNumber].hoverArr];
 
-    this.setState((state) => ({
-      history: [...state.history, Object.assign({}, current, { hoverArr })]
-    }));
+    hoverArr[row * 3 + col] = !hoverArr;
+
+    history[this.state.stepNumber].hoverArr = hoverArr;
+
+    this.setState({
+      history
+    });
   }
 
   handleWin(winnerBoxes: number[]) {
@@ -108,7 +110,10 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
     winnerBoxes.forEach((i) => (hoverArr[i] = true));
 
     this.setState((state) => ({
-      history: [...state.history, Object.assign({}, current, { hoverArr })]
+      history: [
+        ...state.history.slice(0, this.state.history.length - 1),
+        Object.assign({}, current, { hoverArr })
+      ]
     }));
   }
 
@@ -167,6 +172,8 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
       ? (status = `Winner: ${winner}`)
       : (status = `Next player: ${this.state.xIsNext ? 'X' : 'O'}`);
 
+    console.log(this.state);
+
     return (
       <div className='App'>
         <header>
@@ -189,8 +196,16 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
                     <button
                       className='btn btn-blue'
                       onClick={() => this.jumpTo(move)}
-                      onMouseOver={() => this.handleHover(prevMove)}
-                      onMouseOut={() => this.handleHover(prevMove)}
+                      onMouseOver={
+                        !this.state.winner
+                          ? () => this.handleHover(prevMove)
+                          : undefined
+                      }
+                      onMouseOut={
+                        !this.state.winner
+                          ? () => this.handleHover(prevMove)
+                          : undefined
+                      }
                     >
                       {move ? `Go to move ${prevMove}` : 'Go to gamestart'}
                     </button>
