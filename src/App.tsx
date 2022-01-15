@@ -8,9 +8,9 @@ function Square(props: AppTypes.SquareProps) {
       className='square'
       onClick={props.onClick}
       style={
-        props.onWinner
-          ? { background: 'Gold' }
-          : props.onHover
+        props.onHover
+          ? { background: 'blue' }
+          : props.onWinner
           ? { background: 'red' }
           : undefined
       }
