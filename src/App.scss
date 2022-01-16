@@ -5,7 +5,6 @@ html {
 body {
   font: 2rem 'Century Gothic', Futura, sans-serif;
   background: linear-gradient(90deg, #c94b4b, #4b134f);
-  margin: 0;
   color: lightcoral;
 }
 
@@ -40,8 +39,43 @@ body {
   margin-right: 2rem;
 }
 
+.game-info {
+  margin-left: 2rem;
+}
+
+@media screen and (max-width: 480px) {
+  .game {
+    width: 85vw;
+    height: 75vh;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .game-board,
+  .game-info {
+    width: 20rem;
+    margin: 1rem 0;
+  }
+}
+
 .status {
-  margin: 0;
+  color: white;
+  font-weight: bold;
+  background: lightcoral;
+  padding: 1rem;
+  border-radius: 1rem;
+  transition: all 200ms ease-out;
+}
+
+.draw {
+  color: whitesmoke;
+  background: lightskyblue;
+}
+
+.winner {
+  color: crimson;
+  background: yellow;
 }
 
 .board-row {
@@ -83,10 +117,6 @@ body {
 
 .kbd-navigation .square:focus {
   background: #ddd;
-}
-
-.game-info {
-  margin-left: 2rem;
 }
 
 ol {

@@ -9,6 +9,7 @@ interface GameStates {
   }[];
   selected: boolean[];
   winner: null | 'X' | 'O';
+  draw: boolean;
   stepNumber: number;
   xIsNext: boolean;
 }

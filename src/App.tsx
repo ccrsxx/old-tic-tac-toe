@@ -59,6 +59,7 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
       ],
       selected: Array(9).fill(false),
       winner: null,
+      draw: false,
       stepNumber: 0,
       xIsNext: true
     };
@@ -96,6 +97,12 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
       stepNumber: history.length,
       xIsNext: !state.xIsNext
     }));
+
+    if (squares.every((a) => a)) {
+      this.setState({
+        draw: true
+      });
+    }
   }
 
   handleHover([row, col]: number[]) {
@@ -146,6 +153,7 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
         this.setState({
           winner: squares[firstIndex]
         });
+        return;
       }
     }
   }
@@ -163,6 +171,7 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
       selected: Array(9).fill(false),
       hoverArr: Array(9).fill(false),
       winner: null,
+      draw: false,
       stepNumber: 0,
       xIsNext: true
     }));
@@ -177,6 +186,8 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
 
     winner
       ? (status = `Winner: ${winner}`)
+      : this.state.draw
+      ? (status = 'Draw')
       : (status = `Next player: ${this.state.xIsNext ? 'X' : 'O'}`);
 
     console.log(this.state);
@@ -197,7 +208,13 @@ class Game extends React.Component<{}, AppTypes.GameStates> {
               />
             </div>
             <div className='game-info'>
-              <div className='status'>{status}</div>
+              <div
+                className={`status ${
+                  this.state.winner ? 'winner' : this.state.draw ? 'draw' : null
+                }`}
+              >
+                {status}
+              </div>
               <ol>
                 {history.map(({ prevMove }, move) => (
                   <li key={move}>
