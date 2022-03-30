@@ -1,8 +1,8 @@
 {
-  "name": "tic-tac-toe",
+  "name": "old-tic-tac-toe",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://ccrsxx.github.io/tic-tac-toe",
+  "homepage": "http://ccrsxx.github.com/old-tic-tac-toe",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
